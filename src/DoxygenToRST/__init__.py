@@ -1,1 +1,1 @@
-from DoxygenToRST import *
+from .DoxygenToRST import run

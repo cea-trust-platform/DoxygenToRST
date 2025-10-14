@@ -7,7 +7,12 @@ import argparse
 
 import xml.etree.ElementTree as ET
 
-from RST_Writer import RST_Writer
+if __package__ is None or __package__ == '':
+    # uses current directory visibility
+    from RST_Writer import RST_Writer
+else:
+    # uses current package visibility
+    from .RST_Writer import RST_Writer
 
 
 
