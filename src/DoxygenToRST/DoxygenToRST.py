@@ -304,34 +304,36 @@ def convert_class_to_rst(file, output_dir):
     #######################################################
     ### Graphs
     #######################################################
+    # Method 1 : include image from doxygen html output
     # ~ rst_writer.start_section("Inheritance graph", mark="-")
     # ~ img=f"../../html/{class_refid}__inherit__graph.png"
     # ~ rst_writer.add_line(f".. image:: {img}")
     
-    #### not used because very slow. Might reconsider
-    # ~ generate_graphs=False
-    # ~ if generate_graphs:
-        # ~ inheritancegraph=doc.find("inheritancegraph")
-        # ~ id_to_label={}
-        # ~ if inheritancegraph!=None:
-            # ~ rst_writer.start_group("dropdown", title="Inheritance graph", options={"open":""})
-            # ~ rst_writer.start_group("digraph",title=class_name+"_graph") 
-            # ~ for node in inheritancegraph:
-                
-                # ~ node_name=node.find("label").text
-                # ~ id_to_label[node.get("id")]=node_name
-                
-            # ~ for node in inheritancegraph:
-                # ~ node_name=node.find("label").text
-                # ~ list_children=node.findall("childnode")
-                # ~ for child in list_children:
-                    # ~ refid=child.get("refid")
-                    # ~ rst_writer.rst+=f"\"{node_name}\" -> \"{id_to_label[refid]}\";"
-                    # ~ rst_writer.newline()
-                    
+    # Method 2: generate from xml data with graphviz
+    # not used because very slow. Might reconsider
+    # keeping code for future reference, even if already outdated
+    
+    # ~ inheritancegraph=doc.find("inheritancegraph")
+    # ~ id_to_label={}
+    # ~ if inheritancegraph!=None:
+        # ~ rst_writer.start_group("dropdown", title="Inheritance graph", options={"open":""})
+        # ~ rst_writer.start_group("digraph",title=class_name+"_graph") 
+        # ~ for node in inheritancegraph:
             
-            # ~ rst_writer.end_group("digraph")
-            # ~ rst_writer.end_group("dropdown")
+            # ~ node_name=node.find("label").text
+            # ~ id_to_label[node.get("id")]=node_name
+            
+        # ~ for node in inheritancegraph:
+            # ~ node_name=node.find("label").text
+            # ~ list_children=node.findall("childnode")
+            # ~ for child in list_children:
+                # ~ refid=child.get("refid")
+                # ~ rst_writer.rst+=f"\"{node_name}\" -> \"{id_to_label[refid]}\";"
+                # ~ rst_writer.newline()
+                
+        
+        # ~ rst_writer.end_group("digraph")
+        # ~ rst_writer.end_group("dropdown")
     
     
     #######################################################
@@ -392,7 +394,8 @@ def convert_class_to_rst(file, output_dir):
                     # because _ will be removed, leading to same signature
                     # I have cases where both method (with _ at the end and not) are private, 
                     # with same params, completely identical signature in all aspects
-                    # this is crazy...
+                    # and I am not even sure they do the same things...
+                    # this is crazy... 
                     ref_name = definition
                     if ref_name[-1]=="_":
                         ref_name+="-underscore-"
