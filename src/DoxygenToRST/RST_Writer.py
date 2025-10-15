@@ -142,7 +142,7 @@ class RST_Writer:
             os.makedirs(loc)
 
         if force or mode=="a" or not os.path.exists(filename):
-            print(f"write {filename}")
+            # print(f"write {filename}")
             with open(filename, mode) as f:
                 f.write(self.printout())   
         return self.rst
