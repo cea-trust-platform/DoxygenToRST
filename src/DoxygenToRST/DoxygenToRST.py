@@ -30,6 +30,8 @@ subdir_enums="enums"
 subdir_namespaces="namespaces"
 
 
+DOXYGEN_INPUT=""
+
 
 def doxygen_warning(msg):
     print("WARNING: about doxygen (might be ill formed):")
@@ -743,7 +745,12 @@ def convert_filexml_to_rst(file, output_dir):
 
 
     
-def run(input="./xml", output="./rst", keeprst=False, test=False):
+def run(input=".", output="./rst", keeprst=False, test=False):
+    global DOXYGEN_INPUT
+    DOXYGEN_INPUT = DOXYGEN_INPUT
+
+    DOXYGEN_XML=f"{DOXYGEN_INPUT}/xml"
+
     if not keeprst and os.path.isdir(output):
         shutil.rmtree(output)
     
@@ -774,13 +781,13 @@ def run(input="./xml", output="./rst", keeprst=False, test=False):
         "InnerType",
     ]
     
-    tree = ET.parse(f'{input}/index.xml')
+    tree = ET.parse(f'{DOXYGEN_XML}/index.xml')
     root = tree.getroot()
     
     for child in root:
         for key in converters:
             file_refid=child.get('refid')
-            file=f"{input}/{file_refid}.xml"
+            file=f"{DOXYGEN_XML}/{file_refid}.xml"
             if key==child.attrib["kind"]:
                 if not test:
                     converters[key](file, output)

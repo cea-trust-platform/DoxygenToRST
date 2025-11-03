@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+src/DoxygenToRST/DoxygenToRST.py
+src/DoxygenToRST/RST_Writer.py
+src/DoxygenToRST/__init__.py
+src/DoxygenToRST.egg-info/PKG-INFO
+src/DoxygenToRST.egg-info/SOURCES.txt
+src/DoxygenToRST.egg-info/dependency_links.txt
+src/DoxygenToRST.egg-info/top_level.txt
