@@ -215,11 +215,16 @@ def convert_class_to_rst(file, output_dir):
     
     class_name=(elem_name.text)
     
-    class_ref=make_ref(f"{my_type} {class_name}")
+    # two refs are created for each class: 
+    # xml_class_ref is from the xml file, contains a complicated hash that may change anytime
+    # class_ref aims to be more readable and stable, for reference to the doxygen doc in other part of the sphinx doc
     xml_class_ref=doc.get("id")
+    class_ref=make_ref(f"{my_type} {class_name}")
     
     rst_writer.add_target(xml_class_ref)
     rst_writer.add_target(class_ref)
+
+
     rst_writer.start_section(make_cpp_code_to_text(class_name))
     
 
@@ -234,7 +239,9 @@ def convert_class_to_rst(file, output_dir):
     ### Brief description
     #######################################################
     brief=doc.find("briefdescription")
+    rst_writer.start_group("card", title="Brief")
     parse_brief(rst_writer, brief)
+    rst_writer.end_group("card")
     
     #######################################################
     ### How to cite
@@ -247,7 +254,9 @@ def convert_class_to_rst(file, output_dir):
     #######################################################
     detail=doc.find("detaileddescription")
     rst_writer.start_section("Detailed description", mark="-")
+    rst_writer.start_group("card")
     parse_brief(rst_writer, detail)
+    rst_writer.end_group("card")
     
     
     #######################################################
@@ -312,9 +321,13 @@ def convert_class_to_rst(file, output_dir):
     ### Graphs
     #######################################################
     # Method 1 : include image from doxygen html output
-    # ~ rst_writer.start_section("Inheritance graph", mark="-")
-    # ~ img=f"../../html/{class_refid}__inherit__graph.png"
-    # ~ rst_writer.add_line(f".. image:: {img}")
+    rst_writer.start_section("Inheritance graph", mark="-")
+    img=f"{DOXYGEN_INPUT}/html/class{class_name.replace("_","__")}__inherit__graph.png"
+    # image must be added only if it exists. Sometimes there is no class hierarchy because no inheritance
+    if os.path.exists(img):
+        # absolute image paths are searched by sphinx relative to top level source directory of the doc
+        img_path=img.replace("./","/")
+        rst_writer.add_line(f".. image:: {img_path}")
     
     # Method 2: generate from xml data with graphviz
     # not used because very slow. Might reconsider
@@ -747,12 +760,16 @@ def convert_filexml_to_rst(file, output_dir):
     
 def run(input=".", output="./rst", keeprst=False, test=False):
     global DOXYGEN_INPUT
-    DOXYGEN_INPUT = DOXYGEN_INPUT
+    DOXYGEN_INPUT = input
 
     DOXYGEN_XML=f"{DOXYGEN_INPUT}/xml"
 
     if not keeprst and os.path.isdir(output):
+        print("Deleting RST files from doxygen")
         shutil.rmtree(output)
+    else:
+        print("Keeping RST files from doxygen")
+
     
     if not os.path.exists(output):
         os.makedirs(output)
@@ -764,22 +781,11 @@ def run(input=".", output="./rst", keeprst=False, test=False):
     "file":convert_filexml_to_rst,
     }
     
-    test_list=[
-        "Interprete",
-        "Process",
-        "Objet_U",
-        "AbstractIO",
-        "Triangle_32_64", 
-        "TRUSTTab",
-        "Matrice_Base",
-        "Domaine_IJK",
-        "TVAlloc",
-        "TRUSTVect",
-        "TRUSTProblem_sup_eqns",
-        "ICoCo",
-        "VEF_discretisation",
-        "InnerType",
-    ]
+    if test:
+        test_file='./.doxygen_test_list'
+        print(f"Reading list of patterns to include from {test_file}")
+        with open(test_file) as f:
+            test_list = f.read().splitlines()
     
     tree = ET.parse(f'{DOXYGEN_XML}/index.xml')
     root = tree.getroot()
