@@ -163,7 +163,8 @@ def parse_enum(writer, enum):
     return writer
 
 
-def write_how_to_cite(writer, link_text, link_target): 
+def write_how_to_cite(writer, link_text, link_target):
+    writer.add_line("Copy the following pieces of RST/Markdown code to cite this element in other parts of the sphinx documentation (there is a copy button on the top-right when hovering the code block):")
     writer.start_group("tab-set")
     writer.start_group("tab-item", title="RST")
     writer.start_group("code-block", title="rst")
@@ -239,14 +240,14 @@ def convert_class_to_rst(file, output_dir):
     ### Brief description
     #######################################################
     brief=doc.find("briefdescription")
-    rst_writer.start_group("card", title="Brief")
+    rst_writer.start_group("card", title="Brief description")
     parse_brief(rst_writer, brief)
     rst_writer.end_group("card")
     
     #######################################################
     ### How to cite
     #######################################################
-    rst_writer.start_section("How to cite this class in this doc", mark="-")
+    rst_writer.start_section("How to reference this class", mark="-")
     write_how_to_cite(rst_writer, make_cpp_code_to_text(class_name), class_ref)
     
     #######################################################
@@ -282,9 +283,9 @@ def convert_class_to_rst(file, output_dir):
             if ("std::" in base_name or # no ref to standard library
                 base_name in tparam_names_list or  # no ref if inherits from type given by template param
                 base_name == "Problem"): # no ref to Problem from ICoCo
-                rst_writer.rst += f"- {prot} : ``{make_cpp_code_to_text(base_name)}``"
+                rst_writer.rst += f"- {prot} : ``{(base_name)}``"
             else:
-                rst_writer.rst += f"- {prot} : :ref:`{make_cpp_code_to_text(base_name)} <{base_refid}>`"
+                rst_writer.rst += f"- {prot} : :ref:`{(base_name)} <{base_refid}>`"
             if tparams!="":
                 rst_writer+=f" ``{tparams}``"
             rst_writer.newline().newline()
@@ -310,7 +311,7 @@ def convert_class_to_rst(file, output_dir):
                 tparams=format_cpp_code(child.text[child.text.index("<"):])
                 
             deriv_ref=make_ref(f"{deriv_type} {deriv_name}")
-            rst_writer +=f"- {prot} : :ref:`{make_cpp_code_to_text(deriv_name)} <{deriv_refid}>`"
+            rst_writer +=f"- {prot} : :ref:`{(deriv_name)} <{deriv_refid}>`"
             if tparams!="":
                 rst_writer+=f" ``{tparams}``"
             rst_writer.newline().newline()
@@ -321,10 +322,13 @@ def convert_class_to_rst(file, output_dir):
     ### Graphs
     #######################################################
     # Method 1 : include image from doxygen html output
-    rst_writer.start_section("Inheritance graph", mark="-")
     img=f"{DOXYGEN_INPUT}/html/class{class_name.replace("_","__")}__inherit__graph.png"
     # image must be added only if it exists. Sometimes there is no class hierarchy because no inheritance
     if os.path.exists(img):
+        rst_writer.start_section("Inheritance graph", mark="-")
+        rst_writer.add_line("If the image is too small, right-click and open in new tab")
+        rst_writer.newline()
+
         # absolute image paths are searched by sphinx relative to top level source directory of the doc
         img_path=img.replace("./","/")
         rst_writer.add_line(f".. image:: {img_path}")
@@ -429,13 +433,6 @@ def convert_class_to_rst(file, output_dir):
                         
                         
                     rst_writer.add_list_item(f":ref:`{print_name} <{xml_member_ref}>`")
-                    # ~ rst_writer.start_group("card", title=print_name)#, options={"link":f"{make_ref(xml_member_ref)}", "link-type":"ref", "link-alt":"test"})
-                    
-                    # ~ rst_writer.add_line(f":ref:`{print_name} <{xml_member_ref}>`")
-                    # ~ rst_writer.start_group("code-block", title="cpp")
-                    # ~ rst_writer+=f"{code_full_def}"
-                    # ~ rst_writer.end_group("code-block")
-                    # ~ rst_writer.end_group("card")
                     
                     
                     # no custom ref to template specializations, only the one from doxygen
@@ -448,17 +445,24 @@ def convert_class_to_rst(file, output_dir):
                         refs_template_spec.add(xml_member_ref)
                     
                         
-                    rst_list_all_members.start_group("card", title=print_name)
+                    rst_list_all_members.start_section(print_name, mark="^")
+                    rst_list_all_members.start_group("card")
+                    rst_list_all_members.start_group("card", title="Definition")
                     rst_list_all_members.start_group("code-block", title="cpp")
                     rst_list_all_members+=code_full_def
                     rst_list_all_members.end_group("code-block")
-                    rst_list_all_members.newline()
+                    rst_list_all_members.end_group("card")
                     
+                    rst_list_all_members.start_group("card", title="Brief description")
                     parse_brief(rst_list_all_members, member_brief)
+                    rst_list_all_members.end_group("card")
                     
                     rst_list_all_members.newline().newline()
                     
-                    parse_brief(rst_list_all_members, member_detail)
+                    if member_detail!=None:
+                        rst_list_all_members.start_group("dropdown", title="Detailed description")
+                        parse_brief(rst_list_all_members, member_detail)
+                        rst_list_all_members.end_group("dropdown")
                     
                     rst_list_all_members.newline().newline()
                     
@@ -501,21 +505,9 @@ def convert_class_to_rst(file, output_dir):
                         rst_list_all_members.end_group("dropdown")
                         
                     
-                    rst_list_all_members.start_group("dropdown", title="How to cite in this doc:")
+                    rst_list_all_members.start_group("dropdown", title="How to reference this method:")
                     
                     write_how_to_cite(rst_list_all_members, code_full_def, member_ref)
-                    # ~ rst_list_all_members.start_group("tab-set")
-                    # ~ rst_list_all_members.start_group("tab-item", title="RST")
-                    # ~ rst_list_all_members.start_group("code-block", title="rst")
-                    # ~ rst_list_all_members+= f":ref:`{code_full_def} <{member_ref}>`"
-                    # ~ rst_list_all_members.end_group("code-block")
-                    # ~ rst_list_all_members.end_group("tab-item")
-                    # ~ rst_list_all_members.start_group("tab-item", title="Markdown")
-                    # ~ rst_list_all_members.start_group("code-block", title="md")
-                    # ~ rst_list_all_members+= f"TODO"
-                    # ~ rst_list_all_members.end_group("code-block")
-                    # ~ rst_list_all_members.end_group("tab-item")
-                    # ~ rst_list_all_members.end_group("tab-set")
                     rst_list_all_members.end_group("dropdown")
                     
                     rst_list_all_members.end_group("card")
