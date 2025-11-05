@@ -429,7 +429,7 @@ def convert_class_to_rst(file, output_dir):
                     if len(member_name)==1 and member_name.lower()!=member_name:
                         ref_name+="-cap"
                         
-                    member_ref=make_ref(f"{member_prot}-{member_static}-{ref_name}-{args}")
+                    member_ref=make_ref(f"{class_name}-{member_prot}-{member_static}-{ref_name}-{args}")
                         
                         
                     rst_writer.add_list_item(f":ref:`{print_name} <{xml_member_ref}>`")
