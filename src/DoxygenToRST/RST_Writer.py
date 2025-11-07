@@ -135,6 +135,8 @@ class RST_Writer:
         return out
         
     def write_to_file(self, filename, force=False, mode="w"):
+        # sanitize filename just in case
+        filename=filename.replace(":","_")
         
         loc=os.path.dirname(filename)
         if not os.path.exists(loc):
