@@ -135,9 +135,11 @@ class RST_Writer:
         return out
         
     def write_to_file(self, filename, force=False, mode="w"):
-        # sanitize filename just in case
-        filename=filename.replace(":","_")
-        
+        # sanitize filename just in case (with github artifact invalid chars)
+        invalid="\":<>|*?\r\n"
+        for chr in invalid:
+            filename=filename.replace(chr,"_")
+
         loc=os.path.dirname(filename)
         if not os.path.exists(loc):
             print(f"mkdir {loc}")
