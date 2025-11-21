@@ -260,6 +260,17 @@ def convert_class_to_rst(file, output_dir):
     rst_writer.end_group("card")
     
     
+
+    button_options={"color":"dark", "outline":"", "ref-type":"myst", "expand":""}
+
+    def write_heritage_ref(writer, class_def, class_ref, prot):
+        
+        # writer.start_group("button-ref", title=class_ref, options=button_options)
+        # writer.add_line(f"``{class_def.replace(" ","")}``")
+        # writer.end_group("button-ref")
+        # icon=" :octicon:`codescan;1em;sd-text-info` "
+        writer.add_line(f"- :ref:`{make_cpp_code_to_text(class_def)} <{class_ref}>` ({prot})")
+        writer.newline()
     #######################################################
     ### Bases
     #######################################################
@@ -283,11 +294,9 @@ def convert_class_to_rst(file, output_dir):
             if ("std::" in base_name or # no ref to standard library
                 base_name in tparam_names_list or  # no ref if inherits from type given by template param
                 base_name == "Problem"): # no ref to Problem from ICoCo
-                rst_writer.rst += f"- {prot} : ``{(base_name)}``"
+                write_heritage_ref(rst_writer, child.text, "", prot)
             else:
-                rst_writer.rst += f"- {prot} : :ref:`{(base_name)} <{base_refid}>`"
-            if tparams!="":
-                rst_writer+=f" ``{tparams}``"
+                write_heritage_ref(rst_writer, child.text, base_refid, prot)
             rst_writer.newline().newline()
             
         
@@ -305,15 +314,15 @@ def convert_class_to_rst(file, output_dir):
             tparams=""
             deriv_type="Class"
             deriv_name=child.text
-            if "<" in deriv_name:
+            if "<" in child.text:
                 deriv_type="Class Template"
-                deriv_name=make_cpp_code_to_text(child.text[:child.text.index("<")])
+                deriv_code=child.text[:child.text.index("<")]
+                deriv_name=make_cpp_code_to_text(deriv_code)
                 tparams=format_cpp_code(child.text[child.text.index("<"):])
                 
             deriv_ref=make_ref(f"{deriv_type} {deriv_name}")
-            rst_writer +=f"- {prot} : :ref:`{(deriv_name)} <{deriv_refid}>`"
-            if tparams!="":
-                rst_writer+=f" ``{tparams}``"
+            # rst_writer +=f"- {prot} : :ref:`{(deriv_name)} <{deriv_refid}>`"
+            write_heritage_ref(rst_writer, child.text, deriv_refid, prot)
             rst_writer.newline().newline()
             
 
@@ -329,6 +338,13 @@ def convert_class_to_rst(file, output_dir):
         rst_writer.add_line("If the image is too small, right-click and open in new tab")
         rst_writer.newline()
 
+        img_ref=f"{make_ref(class_name)}-inherit-graph"
+
+        rst_writer.start_group("dropdown", title="How to reference this graph")
+        write_how_to_cite(rst_writer, f"{class_name} Inheritance Graph", img_ref)
+        rst_writer.end_group("dropdown")
+
+        rst_writer.add_target(img_ref)
         # absolute image paths are searched by sphinx relative to top level source directory of the doc
         img_path=img.replace("./","/")
         rst_writer.add_line(f".. image:: {img_path}")
@@ -365,12 +381,12 @@ def convert_class_to_rst(file, output_dir):
     #######################################################
     list_sections=doc.findall("sectiondef")
     section_types={
-        "public-func":["List of Public Methods"],
-        "protected-func":["List of Protected Methods"],
-        "private-func":["List of Private Methods"],
-        "public-static-func":["List of Public Static Methods"],
-        "protected-static-func":["List of Protected Static Methods"],
-        "private-static-func":["List of Private Static Methods"],
+        "public-func":["Member Functions: Public"],
+        "protected-func":["Member Functions: Protected"],
+        "private-func":["Member Functions: Private"],
+        "public-static-func":["Member Functions: Static Public"],
+        "protected-static-func":["Member Functions: Static Protected"],
+        "private-static-func":["Member Functions: Static Private"],
         }
     # used to append a section with all members at the end
     rst_list_all_members=RST_Writer(init_indent=0) 
