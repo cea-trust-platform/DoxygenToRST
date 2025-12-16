@@ -4,7 +4,11 @@ pyproject.toml
 src/DoxygenToRST/DoxygenToRST.py
 src/DoxygenToRST/RST_Writer.py
 src/DoxygenToRST/__init__.py
+src/DoxygenToRST/commons.py
 src/DoxygenToRST.egg-info/PKG-INFO
 src/DoxygenToRST.egg-info/SOURCES.txt
 src/DoxygenToRST.egg-info/dependency_links.txt
 src/DoxygenToRST.egg-info/top_level.txt
+src/DoxygenToRST/converters/BaseConverter.py
+src/DoxygenToRST/converters/ClassConverter.py
+src/DoxygenToRST/converters/__init__.py
